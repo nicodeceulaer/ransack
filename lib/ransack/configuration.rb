@@ -4,8 +4,11 @@ require 'ransack/predicate'
 module Ransack
   module Configuration
 
-    mattr_accessor :predicates
+    mattr_accessor :predicates, :options
     self.predicates = {}
+    self.options = {
+        :search_key => :q
+    }
 
     def configure
       yield self
@@ -16,6 +19,7 @@ module Ransack
       opts[:name] = name
       compounds = opts.delete(:compounds)
       compounds = true if compounds.nil?
+      compounds = false if opts[:wants_array]
       opts[:arel_predicate] = opts[:arel_predicate].to_s
 
       self.predicates[name] = Predicate.new(opts)
@@ -29,6 +33,11 @@ module Ransack
           )
         )
       end if compounds
+    end
+
+    # default search_key that, it can be overridden on sort_link level
+    def search_key=(name)
+      self.options[:search_key] = name
     end
 
   end
